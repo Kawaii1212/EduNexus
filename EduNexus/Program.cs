@@ -1,7 +1,21 @@
+using DataAccessLayer;
+using DataAccessLayer.Repositories;
+using DataAccessLayer.Services;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Initialize DataAccessLayer static configuration
+AppConfiguration.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Register Repositories and Services
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 
 var app = builder.Build();
 

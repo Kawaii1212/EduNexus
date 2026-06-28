@@ -80,7 +80,7 @@ namespace EduNexus.Controllers
 
         public IActionResult EssaySubmit()
         {
-            return View();
+            return RedirectToAction("SubmitEssay", "Assignment", new { assignmentId = 1 });
         }
 
         public IActionResult EssayResults()
