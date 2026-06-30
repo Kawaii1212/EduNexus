@@ -1,4 +1,5 @@
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using DataAccessLayer.Models;
 
 namespace DataAccessLayer.DAOs;
@@ -30,5 +31,24 @@ public class SubmissionDAO : BaseDAO<Submission>
         using var context = GetContext();
         return context.Submissions
             .FirstOrDefault(s => s.AssignmentId == assignmentId && s.StudentId == studentId);
+    }
+
+    public Submission? GetByIdWithDetails(long submissionId)
+    {
+        using var context = GetContext();
+        return context.Submissions
+            .Include(s => s.Student)
+            .Include(s => s.Assignment)
+            .FirstOrDefault(s => s.Id == submissionId);
+    }
+
+    public List<Submission> GetAllWithDetails()
+    {
+        using var context = GetContext();
+        return context.Submissions
+            .Include(s => s.Student)
+            .Include(s => s.Assignment)
+            .OrderByDescending(s => s.SubmittedAt)
+            .ToList();
     }
 }

@@ -46,4 +46,35 @@ public class SubmissionService : ISubmissionService
             _submissionRepository.AddSubmission(newSubmission);
         }
     }
+
+    public Submission GetSubmissionForGrading(long submissionId)
+    {
+        var submission = _submissionRepository.GetSubmissionById(submissionId);
+        if (submission == null)
+        {
+            throw new Exception("Submission not found.");
+        }
+        return submission;
+    }
+
+    public void GradeSubmission(long submissionId, decimal finalScore, long teacherId)
+    {
+        var submission = _submissionRepository.GetSubmissionById(submissionId);
+        if (submission == null)
+        {
+            throw new Exception("Submission not found.");
+        }
+
+        submission.FinalScore = finalScore;
+        submission.GradedBy = teacherId;
+        submission.GradedAt = DateTimeOffset.UtcNow;
+        submission.Status = "GRADED";
+
+        _submissionRepository.UpdateSubmission(submission);
+    }
+
+    public List<Submission> GetAllSubmissions()
+    {
+        return _submissionRepository.GetAllSubmissions();
+    }
 }
