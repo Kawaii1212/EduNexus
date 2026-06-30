@@ -19,4 +19,14 @@ public class SubmissionRepository : ISubmissionRepository
     {
         return SubmissionDAO.Instance.GetByAssignmentAndStudent(assignmentId, studentId);
     }
+
+    public Submission? GetSubmissionById(long submissionId)
+    {
+        return SubmissionDAO.Instance.GetByIdWithDetails(submissionId);
+    }
+
+    public List<Submission> GetAllSubmissions()
+    {
+        return SubmissionDAO.Instance.GetAllWithDetails();
+    }
 }
