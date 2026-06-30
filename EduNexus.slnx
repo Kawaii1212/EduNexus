@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="EduNexus/EduNexus.csproj" />
-  <Project Path="DataAccessLayer/DataAccessLayer.csproj" />
 </Solution>

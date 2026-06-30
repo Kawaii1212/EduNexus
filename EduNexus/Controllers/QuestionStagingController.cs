@@ -1,6 +1,7 @@
-﻿using System;
+using EduNexus.ViewModels;
+using System;
 using System.Threading.Tasks;
-using DataAccessLayer.Services;
+using EduNexus.Services;
 using EduNexus.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,11 +48,11 @@ public class QuestionStagingController : Controller
     {
         if (!ModelState.IsValid)
         {
-            TempData["ErrorMessage"] = "Vui lòng điền đầy đủ thông tin.";
+            TempData["ErrorMessage"] = "Vui l�ng di?n d?y d? th�ng tin.";
             return RedirectToAction(nameof(Index), new { moduleId = form.ModuleId });
         }
 
-        // TODO: thay bằng Session["UserId"] sau khi Auth xong
+        // TODO: thay b?ng Session["UserId"] sau khi Auth xong
         long requesterId = 1;
 
         try
@@ -59,16 +60,16 @@ public class QuestionStagingController : Controller
             var (questions, tokens) = await _questionService.GenerateAndSaveAsync(
                 form.ModuleId, form.Topic, form.Difficulty, form.Count, requesterId);
 
-            TempData["SuccessMessage"] = $"✅ Sinh thành công {questions.Count} câu hỏi. Vui lòng duyệt từng câu bên dưới.";
+            TempData["SuccessMessage"] = $"? Sinh th�nh c�ng {questions.Count} c�u h?i. Vui l�ng duy?t t?ng c�u b�n du?i.";
             TempData["LastTokensUsed"] = tokens.ToString();
         }
         catch (TimeoutException ex)
         {
-            TempData["ErrorMessage"] = $"⏱ {ex.Message}";
+            TempData["ErrorMessage"] = $"? {ex.Message}";
         }
         catch (Exception ex)
         {
-            TempData["ErrorMessage"] = $"❌ {ex.Message}";
+            TempData["ErrorMessage"] = $"? {ex.Message}";
         }
 
         return RedirectToAction(nameof(Index), new { moduleId = form.ModuleId });
@@ -79,10 +80,10 @@ public class QuestionStagingController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Approve(long id, long moduleId)
     {
-        bool ok = _questionService.Approve(id, 1); // TODO: lấy userId từ Session
+        bool ok = _questionService.Approve(id, 1); // TODO: l?y userId t? Session
         TempData[ok ? "SuccessMessage" : "ErrorMessage"] = ok
-            ? "✅ Câu hỏi đã được duyệt vào ngân hàng câu hỏi."
-            : "❌ Không tìm thấy câu hỏi.";
+            ? "? C�u h?i d� du?c duy?t v�o ng�n h�ng c�u h?i."
+            : "? Kh�ng t�m th?y c�u h?i.";
         return RedirectToAction(nameof(Index), new { moduleId });
     }
 
@@ -93,8 +94,8 @@ public class QuestionStagingController : Controller
     {
         bool ok = _questionService.Reject(id);
         TempData[ok ? "SuccessMessage" : "ErrorMessage"] = ok
-            ? "🚫 Câu hỏi đã bị từ chối."
-            : "❌ Không tìm thấy câu hỏi.";
+            ? "?? C�u h?i d� b? t? ch?i."
+            : "? Kh�ng t�m th?y c�u h?i.";
         return RedirectToAction(nameof(Index), new { moduleId });
     }
 
@@ -105,8 +106,8 @@ public class QuestionStagingController : Controller
     {
         bool ok = _questionService.DeleteDraft(id);
         TempData[ok ? "SuccessMessage" : "ErrorMessage"] = ok
-            ? "🗑 Đã xoá câu hỏi khỏi staging."
-            : "❌ Không thể xoá (không tồn tại hoặc không còn ở DRAFT).";
+            ? "?? �� xo� c�u h?i kh?i staging."
+            : "? Kh�ng th? xo� (kh�ng t?n t?i ho?c kh�ng c�n ? DRAFT).";
         return RedirectToAction(nameof(Index), new { moduleId });
     }
 
@@ -118,8 +119,8 @@ public class QuestionStagingController : Controller
         var drafts = _questionService.GetDraftsByModule(moduleId);
         int count = 0;
         foreach (var q in drafts)
-            if (_questionService.Approve(q.Id, 1)) count++; // TODO: userId từ Session
-        TempData["SuccessMessage"] = $"✅ Đã duyệt tất cả {count} câu hỏi.";
+            if (_questionService.Approve(q.Id, 1)) count++; // TODO: userId t? Session
+        TempData["SuccessMessage"] = $"? �� duy?t t?t c? {count} c�u h?i.";
         return RedirectToAction(nameof(Index), new { moduleId });
     }
 }

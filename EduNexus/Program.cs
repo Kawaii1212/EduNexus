@@ -1,10 +1,10 @@
-using DataAccessLayer;
-using DataAccessLayer.Repositories;
-using DataAccessLayer.Services;
+using EduNexus;
+using EduNexus.Repositories;
+using EduNexus.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Initialize DataAccessLayer static configuration
+// Initialize EduNexus static configuration
 AppConfiguration.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 

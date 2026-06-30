@@ -1,10 +1,11 @@
-﻿using System;
+using EduNexus.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using DataAccessLayer.Models;
-using DataAccessLayer.Services;
+using EduNexus.Models;
+using EduNexus.Services;
 using EduNexus.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +49,7 @@ public class QuestionController : Controller
         var q = _questionService.GetById(id);
         if (q == null)
         {
-            TempData["ErrorMessage"] = "Không tìm thấy câu hỏi.";
+            TempData["ErrorMessage"] = "Kh�ng t�m th?y c�u h?i.";
             return RedirectToAction(nameof(Index));
         }
         return View(q);
@@ -75,7 +76,7 @@ public class QuestionController : Controller
             return View(form);
         }
 
-        // Giả lập userId = 1 khi chưa có Auth hoàn chỉnh
+        // Gi? l?p userId = 1 khi chua c� Auth ho�n ch?nh
         long creatorId = 1;
 
         var q = new Question
@@ -98,12 +99,12 @@ public class QuestionController : Controller
         try
         {
             _questionService.Add(q);
-            TempData["SuccessMessage"] = "✅ Thêm câu hỏi thủ công thành công.";
+            TempData["SuccessMessage"] = "? Th�m c�u h?i th? c�ng th�nh c�ng.";
             return RedirectToAction(nameof(Index), new { moduleId = form.ModuleId });
         }
         catch (Exception ex)
         {
-            ViewData["ErrorMessage"] = $"Lỗi hệ thống: {ex.Message}";
+            ViewData["ErrorMessage"] = $"L?i h? th?ng: {ex.Message}";
             form.Modules = _questionService.GetAllModules();
             return View(form);
         }
@@ -115,7 +116,7 @@ public class QuestionController : Controller
         var q = _questionService.GetById(id);
         if (q == null)
         {
-            TempData["ErrorMessage"] = "Không tìm thấy câu hỏi.";
+            TempData["ErrorMessage"] = "Kh�ng t�m th?y c�u h?i.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -156,7 +157,7 @@ public class QuestionController : Controller
         var q = _questionService.GetById(id);
         if (q == null)
         {
-            TempData["ErrorMessage"] = "Không tìm thấy câu hỏi để cập nhật.";
+            TempData["ErrorMessage"] = "Kh�ng t�m th?y c�u h?i d? c?p nh?t.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -173,12 +174,12 @@ public class QuestionController : Controller
         try
         {
             _questionService.Update(q);
-            TempData["SuccessMessage"] = "✅ Cập nhật câu hỏi thành công.";
+            TempData["SuccessMessage"] = "? C?p nh?t c�u h?i th�nh c�ng.";
             return RedirectToAction(nameof(Index), new { moduleId = form.ModuleId });
         }
         catch (Exception ex)
         {
-            ViewData["ErrorMessage"] = $"Lỗi hệ thống: {ex.Message}";
+            ViewData["ErrorMessage"] = $"L?i h? th?ng: {ex.Message}";
             form.Modules = _questionService.GetAllModules();
             return View(form);
         }
@@ -192,18 +193,18 @@ public class QuestionController : Controller
         var q = _questionService.GetById(id);
         if (q == null)
         {
-            TempData["ErrorMessage"] = "Không tìm thấy câu hỏi để xoá.";
+            TempData["ErrorMessage"] = "Kh�ng t�m th?y c�u h?i d? xo�.";
             return RedirectToAction(nameof(Index));
         }
 
         try
         {
             _questionService.Delete(q);
-            TempData["SuccessMessage"] = "🗑 Đã xoá câu hỏi thành công.";
+            TempData["SuccessMessage"] = "?? �� xo� c�u h?i th�nh c�ng.";
         }
         catch (Exception ex)
         {
-            TempData["ErrorMessage"] = $"❌ Không thể xoá câu hỏi này: {ex.Message}";
+            TempData["ErrorMessage"] = $"? Kh�ng th? xo� c�u h?i n�y: {ex.Message}";
         }
 
         return RedirectToAction(nameof(Index), new { moduleId = q.ModuleId });
@@ -226,7 +227,7 @@ public class QuestionController : Controller
     {
         if (model.ModuleId <= 0)
         {
-            ModelState.AddModelError(nameof(model.ModuleId), "Vui lòng chọn Module nhận câu hỏi.");
+            ModelState.AddModelError(nameof(model.ModuleId), "Vui l�ng ch?n Module nh?n c�u h?i.");
         }
 
         var modules = _questionService.GetAllModules();
@@ -249,7 +250,7 @@ public class QuestionController : Controller
         }
         else
         {
-            ModelState.AddModelError("", "Vui lòng upload file .csv hoặc dán nội dung CSV.");
+            ModelState.AddModelError("", "Vui l�ng upload file .csv ho?c d�n n?i dung CSV.");
             return View(model);
         }
 
@@ -257,7 +258,7 @@ public class QuestionController : Controller
         var questionsToImport = new List<Question>();
         var errors = new List<string>();
 
-        // Giả lập creatorId = 1
+        // Gi? l?p creatorId = 1
         long creatorId = 1;
         int rowNum = 0;
         bool isFirstLine = true;
@@ -267,14 +268,14 @@ public class QuestionController : Controller
             rowNum++;
             if (string.IsNullOrWhiteSpace(rawLine)) continue;
 
-            // Bỏ qua dòng tiêu đề nếu dòng đầu trùng định dạng cột mẫu
+            // B? qua d�ng ti�u d? n?u d�ng d?u tr�ng d?nh d?ng c?t m?u
             var columns = ParseCsvLine(rawLine);
             if (isFirstLine)
             {
                 isFirstLine = false;
                 if (columns.Count > 0 &&
                     (columns[0].Equals("Content", StringComparison.OrdinalIgnoreCase) ||
-                     columns[0].Equals("Nội dung", StringComparison.OrdinalIgnoreCase)))
+                     columns[0].Equals("N?i dung", StringComparison.OrdinalIgnoreCase)))
                 {
                     continue; // Skip header
                 }
@@ -282,7 +283,7 @@ public class QuestionController : Controller
 
             if (columns.Count < 6)
             {
-                errors.Add($"Dòng {rowNum}: Thiếu dữ liệu (Cần ít nhất 6 cột: Nội dung, A, B, C, D, Đáp án đúng).");
+                errors.Add($"D�ng {rowNum}: Thi?u d? li?u (C?n �t nh?t 6 c?t: N?i dung, A, B, C, D, ��p �n d�ng).");
                 continue;
             }
 
@@ -312,18 +313,18 @@ public class QuestionController : Controller
             // Validate
             if (string.IsNullOrWhiteSpace(content))
             {
-                errors.Add($"Dòng {rowNum}: Nội dung câu hỏi không được để trống.");
+                errors.Add($"D�ng {rowNum}: N?i dung c�u h?i kh�ng du?c d? tr?ng.");
                 continue;
             }
             if (string.IsNullOrWhiteSpace(optA) || string.IsNullOrWhiteSpace(optB) ||
                 string.IsNullOrWhiteSpace(optC) || string.IsNullOrWhiteSpace(optD))
             {
-                errors.Add($"Dòng {rowNum}: Các lựa chọn A, B, C, D không được để trống.");
+                errors.Add($"D�ng {rowNum}: C�c l?a ch?n A, B, C, D kh�ng du?c d? tr?ng.");
                 continue;
             }
             if (correctOpt != "A" && correctOpt != "B" && correctOpt != "C" && correctOpt != "D")
             {
-                errors.Add($"Dòng {rowNum}: Đáp án đúng '{correctOpt}' không hợp lệ (phải là A, B, C hoặc D).");
+                errors.Add($"D�ng {rowNum}: ��p �n d�ng '{correctOpt}' kh�ng h?p l? (ph?i l� A, B, C ho?c D).");
                 continue;
             }
 
@@ -349,7 +350,7 @@ public class QuestionController : Controller
 
         if (questionsToImport.Count == 0 && errors.Count == 0)
         {
-            errors.Add("Không tìm thấy dữ liệu hợp lệ để import.");
+            errors.Add("Kh�ng t�m th?y d? li?u h?p l? d? import.");
         }
 
         if (errors.Count > 0)
@@ -361,18 +362,18 @@ public class QuestionController : Controller
         try
         {
             _questionService.AddRange(questionsToImport);
-            TempData["SuccessMessage"] = $"✅ Import thành công {questionsToImport.Count} câu hỏi vào ngân hàng câu hỏi.";
+            TempData["SuccessMessage"] = $"? Import th�nh c�ng {questionsToImport.Count} c�u h?i v�o ng�n h�ng c�u h?i.";
             return RedirectToAction(nameof(Index), new { moduleId = model.ModuleId });
         }
         catch (Exception ex)
         {
-            errors.Add($"Lỗi lưu database: {ex.Message}");
+            errors.Add($"L?i luu database: {ex.Message}");
             model.ImportErrors = errors;
             return View(model);
         }
     }
 
-    // Helper tách dòng CSV hỗ trợ dấu ngoặc kép
+    // Helper t�ch d�ng CSV h? tr? d?u ngo?c k�p
     private static List<string> ParseCsvLine(string line)
     {
         var result = new List<string>();
@@ -385,7 +386,7 @@ public class QuestionController : Controller
             char c = line[i];
             if (c == '"')
             {
-                // Xử lý dấu ngoặc kép lồng nhau "" đại diện cho "
+                // X? l� d?u ngo?c k�p l?ng nhau "" d?i di?n cho "
                 if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
                 {
                     currentToken.Append('"');

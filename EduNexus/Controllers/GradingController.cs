@@ -1,6 +1,7 @@
+using EduNexus.ViewModels;
 using System;
 using Microsoft.AspNetCore.Mvc;
-using DataAccessLayer.Services;
+using EduNexus.Services;
 using EduNexus.Models;
 
 namespace EduNexus.Controllers;
