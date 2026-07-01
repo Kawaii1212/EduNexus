@@ -75,6 +75,12 @@
         .logo span {
             color: var(--primary);
         }
+        
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
 
         .nav-item {
             padding: 12px 16px;
@@ -386,23 +392,27 @@
             Edu<span>Nexus</span>
         </div>
         <nav>
-            <a href="#" class="nav-item">
+            <a href="@Url.Action("StudentDashboard", "Common")" class="nav-item">
                 <i class="fa-solid fa-chart-line"></i> Dashboard
             </a>
-            <a href="#" class="nav-item">
+            <a href="@Url.Action("AllCourses", "Common")" class="nav-item">
                 <i class="fa-solid fa-book-open"></i> All Courses
             </a>
-            <a href="@Url.Action("PersonalProgress", "Home")" class="nav-item">
+            <a href="@Url.Action("PersonalProgress", "Common")" class="nav-item">
                 <i class="fa-solid fa-bullseye"></i> Personal Progress
             </a>
-            <a href="@Url.Action("StudentLibrary", "Home")" class="nav-item active">
+            <a href="@Url.Action("StudentLibrary", "Common")" class="nav-item active">
                 <i class="fa-solid fa-folder-open"></i> Library
             </a>
             <a href="#" class="nav-item">
                 <i class="fa-solid fa-users"></i> Community
             </a>
-            <a href="#" class="nav-item">
+            <div style="flex: 1;"></div>
+            <a href="@Url.Action("StudentSettings", "Common")" class="nav-item">
                 <i class="fa-solid fa-gear"></i> Settings
+            </a>
+            <a href="@Url.Action("SignOut", "Common")" class="nav-item" style="color: var(--danger);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
             </a>
         </nav>
     </aside>

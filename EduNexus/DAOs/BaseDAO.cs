@@ -27,11 +27,11 @@ public class BaseDAO<T> where T : class
         }
     }
 
-    protected EduNexusNew02Context GetContext()
+    protected EduNexusContext GetContext()
     {
-        var optionsBuilder = new DbContextOptionsBuilder<EduNexusNew02Context>();
+        var optionsBuilder = new DbContextOptionsBuilder<EduNexusContext>();
         optionsBuilder.UseSqlServer(AppConfiguration.ConnectionString);
-        return new EduNexusNew02Context(optionsBuilder.Options);
+        return new EduNexusContext(optionsBuilder.Options);
     }
 
     public virtual IEnumerable<T> GetAll()

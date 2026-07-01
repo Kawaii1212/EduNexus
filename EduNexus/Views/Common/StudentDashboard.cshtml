@@ -1,0 +1,769 @@
+@model EduNexus.ViewModels.StudentDashboardViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - EduNexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Synchronized with EduNexus */
+            --primary: #5c24ff;
+            --primary-light: #9b8cf8;
+            --primary-lighter: #f0edff;
+            --primary-hover: #481ce0;
+            --bg-color: #fafafa;
+            --surface: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --text-light: #9ca3af;
+            --border: #e5e7eb;
+            --border-hover: #d1d5db;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo span {
+            color: var(--primary);
+        }
+        
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-lighter);
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 40px;
+            max-width: 1200px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(92, 36, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--bg-color);
+            border-color: var(--border-hover);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .icon-purple { background: var(--primary-lighter); color: var(--primary); }
+        .icon-blue { background: #eff6ff; color: #3b82f6; }
+        .icon-orange { background: #fffbeb; color: var(--warning); }
+        .icon-red { background: #fef2f2; color: var(--danger); }
+
+        .stat-info h4 {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .stat-info p {
+            color: var(--text-main);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* Dashboard Layout Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-all {
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        /* Continue Learning Banner */
+        .continue-banner {
+            display: flex;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            color: white;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 20px rgba(92, 36, 255, 0.15);
+        }
+
+        .banner-info h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .banner-info p {
+            font-size: 15px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 3px;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-white:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Recent Activity / Course List */
+        .course-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .course-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            transition: 0.2s;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .course-item:hover {
+            border-color: var(--primary-light);
+            background: var(--bg-color);
+        }
+
+        .course-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .course-details {
+            flex: 1;
+        }
+
+        .course-details h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .course-details p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .course-action {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        /* Upcoming Deadlines */
+        .deadline-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .deadline-item {
+            display: flex;
+            gap: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .deadline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .date-box {
+            background: var(--bg-color);
+            border-radius: var(--radius-md);
+            width: 50px;
+            height: 55px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+        }
+
+        .date-month {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--danger);
+            text-transform: uppercase;
+        }
+
+        .date-day {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .deadline-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .deadline-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-danger { background: #fef2f2; color: var(--danger); }
+        .badge-warning { background: #fffbeb; color: var(--warning); }
+
+        /* Notifications */
+        .notification-list {
+            margin-top: 24px;
+        }
+
+        .notification-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-lighter);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .notif-content p {
+            font-size: 13px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .notif-time {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        @@media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .continue-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-graduation-cap" style="color: var(--primary)"></i>
+            Edu<span>Nexus</span>
+        </div>
+        <nav>
+            <a href="@Url.Action("StudentDashboard", "Common")" class="nav-item active">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </a>
+            <a href="@Url.Action("AllCourses", "Common")" class="nav-item">
+                <i class="fa-solid fa-book-open"></i> All Courses
+            </a>
+            <a href="@Url.Action("PersonalProgress", "Common")" class="nav-item">
+                <i class="fa-solid fa-bullseye"></i> Personal Progress
+            </a>
+            <a href="@Url.Action("StudentLibrary", "Common")" class="nav-item">
+                <i class="fa-solid fa-folder-open"></i> Library
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-users"></i> Community
+            </a>
+            <div style="flex: 1;"></div>
+            <a href="@Url.Action("StudentSettings", "Common")" class="nav-item">
+                <i class="fa-solid fa-gear"></i> Settings
+            </a>
+            <a href="@Url.Action("SignOut", "Common")" class="nav-item" style="color: var(--danger);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <header class="header">
+            <div class="header-title">
+                <h1>Welcome back, @(Model?.StudentName ?? "Student")! 👋</h1>
+                <p>Here is what's happening with your learning journey today.</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-outline" title="Notifications">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <a href="@Url.Action("AllCourses", "Common")" class="btn btn-primary" style="text-decoration: none;">
+                    <i class="fa-solid fa-magnifying-glass"></i> Explore Courses
+                </a>
+            </div>
+        </header>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-purple">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>In Progress</h4>
+                    <p>@(Model?.CoursesInProgress ?? 0) Courses</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-red">
+                    <i class="fa-solid fa-stopwatch"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>Due Soon</h4>
+                    <p>@(Model?.AssignmentsDue ?? 0) Assignments</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-blue">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>Time Learned</h4>
+                    <p>@(Model?.TotalLearningHours ?? 0) Hours</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-orange">
+                    <i class="fa-solid fa-fire"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>Current Streak</h4>
+                    <p>@(Model?.CurrentStreak ?? 0) Days</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <!-- Left Column -->
+            <div class="left-col">
+                
+                <!-- Continue Learning Banner -->
+                @if (Model != null && Model.LastAccessedCourse != null)
+                {
+                    <div class="continue-banner">
+                        <div class="banner-info">
+                            <h2>@Model.LastAccessedCourse.CourseName</h2>
+                            <p>@Model.LastAccessedCourse.CurrentModuleOrLesson</p>
+                            
+                            <div class="progress-container">
+                                <div class="progress-text">
+                                    <span>Course Progress</span>
+                                    <span>@Model.LastAccessedCourse.ProgressPercent.ToString("0")%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: @Model.LastAccessedCourse.ProgressPercent.ToString("0").Replace(",", ".");%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="@Url.Action("LessonView", "Lesson")" class="btn-white">
+                            <i class="fa-solid fa-play"></i> Continue
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="continue-banner">
+                        <div class="banner-info">
+                            <h2>Start Learning Today</h2>
+                            <p>Explore our courses and start learning new skills!</p>
+                        </div>
+                        <a href="@Url.Action("AllCourses", "Common")" class="btn-white">
+                            <i class="fa-solid fa-magnifying-glass"></i> Browse Courses
+                        </a>
+                    </div>
+                }
+
+                <!-- Enrolled Courses -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title"><i class="fa-solid fa-layer-group"></i> My Courses</h3>
+                        <a href="@Url.Action("PersonalProgress", "Common")" class="view-all">View All</a>
+                    </div>
+                    
+                    <div class="course-list">
+                        @if (Model != null && Model.OngoingCourses.Count > 0)
+                        {
+                            @foreach (var course in Model.OngoingCourses)
+                            {
+                                <a href="@Url.Action("LessonView", "Lesson")" class="course-item">
+                                    <div class="course-icon" style="color: @course.IconColorHex; background: @course.IconColorHex; background-color: rgba(0,0,0,0.05);">
+                                        <i class="@course.IconClass"></i>
+                                    </div>
+                                    <div class="course-details">
+                                        <h4>@course.CourseName</h4>
+                                        <p>@course.CurrentModuleOrLesson</p>
+                                    </div>
+                                    <div class="course-progress" style="width: 100px; margin-right: 16px;">
+                                        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: var(--text-muted); font-weight: 600;">
+                                            <span>@course.ProgressPercent.ToString("0")%</span>
+                                        </div>
+                                        <div style="height: 6px; background: var(--border); border-radius: 3px;">
+                                            <div style="height: 100%; width: @course.ProgressPercent.ToString("0").Replace(",", ".");%; background: var(--primary); border-radius: 3px;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="course-action">
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </div>
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <p style="color: var(--text-muted); text-align: center; padding: 20px;">You are not enrolled in any courses yet.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-col">
+                
+                <!-- Upcoming Deadlines -->
+                <div class="section-card" style="margin-bottom: 24px;">
+                    <div class="section-header">
+                        <h3 class="section-title"><i class="fa-solid fa-calendar-day"></i> Deadlines</h3>
+                    </div>
+                    
+                    <div class="deadline-list">
+                        @if (Model != null && Model.UpcomingDeadlines.Count > 0)
+                        {
+                            @foreach (var deadline in Model.UpcomingDeadlines)
+                            {
+                                <div class="deadline-item">
+                                    <div class="date-box">
+                                        <span class="date-month">@deadline.Month</span>
+                                        <span class="date-day">@deadline.Day</span>
+                                    </div>
+                                    <div class="deadline-info">
+                                        <h4>@deadline.Title</h4>
+                                        <p>@deadline.CourseName</p>
+                                        @if (deadline.IsDanger)
+                                        {
+                                            <span class="badge badge-danger">@deadline.DueInText</span>
+                                        }
+                                        else if (deadline.IsWarning)
+                                        {
+                                            <span class="badge badge-warning">@deadline.DueInText</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background: var(--bg-color); color: var(--text-muted);">@deadline.DueInText</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p style="color: var(--text-muted); text-align: center; padding: 20px;">No upcoming deadlines.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Recent Notifications -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title"><i class="fa-regular fa-bell"></i> Notifications</h3>
+                    </div>
+                    
+                    <div class="notification-list">
+                        @if (Model != null && Model.RecentNotifications.Count > 0)
+                        {
+                            @foreach (var notif in Model.RecentNotifications)
+                            {
+                                <div class="notification-item">
+                                    <div class="notif-icon" style="@notif.IconColorClass">
+                                        <i class="fa-solid @notif.IconClass"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p>@Html.Raw(notif.Content)</p>
+                                        <span class="notif-time">@notif.TimeAgo</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p style="color: var(--text-muted); text-align: center; padding: 20px;">No new notifications.</p>
+                        }
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+
+    </main>
+
+</body>
+</html>

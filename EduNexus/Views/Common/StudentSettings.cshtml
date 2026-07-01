@@ -1,0 +1,532 @@
+@model EduNexus.ViewModels.StudentSettingsViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Settings - EduNexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5c24ff;
+            --primary-light: #9b8cf8;
+            --primary-lighter: #f0edff;
+            --primary-hover: #481ce0;
+            --bg-color: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles (Same as Dashboard) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            flex-shrink: 0;
+        }
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-left: 12px;
+        }
+        .brand span { color: var(--text-main); }
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+        .nav-item.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(92, 36, 255, 0.2);
+        }
+        .nav-item i { width: 20px; font-size: 18px; }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .topbar {
+            height: 80px;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .topbar h1 { font-size: 20px; font-weight: 700; }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Settings Area */
+        .settings-container {
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            gap: 40px;
+        }
+
+        /* Left Settings Nav */
+        .settings-nav {
+            width: 240px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .settings-tab {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .settings-tab:hover {
+            background: var(--surface);
+            color: var(--text-main);
+        }
+        .settings-tab.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Right Settings Content */
+        .settings-content {
+            flex: 1;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 32px;
+        }
+
+        .settings-section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            font-size: 14px;
+            transition: all 0.2s;
+            background: var(--bg-color);
+            color: var(--text-main);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--primary-lighter);
+        }
+
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            box-shadow: var(--shadow-md);
+        }
+        .avatar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(92, 36, 255, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+        .btn-outline:hover {
+            background-color: var(--bg-color);
+        }
+
+        /* Toggles */
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+        .toggle-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .toggle-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .toggle-switch.on {
+            background: var(--primary);
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-switch.on::after {
+            transform: translateX(20px);
+        }
+
+        .tab-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-section.active {
+            display: block;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-graduation-cap"></i>
+            Edu<span>Nexus</span>
+        </div>
+        <nav>
+            <a href="@Url.Action("StudentDashboard", "Common")" class="nav-item">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </a>
+            <a href="@Url.Action("AllCourses", "Common")" class="nav-item">
+                <i class="fa-solid fa-book-open"></i> All Courses
+            </a>
+            <a href="@Url.Action("PersonalProgress", "Common")" class="nav-item">
+                <i class="fa-solid fa-bullseye"></i> Personal Progress
+            </a>
+            <a href="@Url.Action("StudentLibrary", "Common")" class="nav-item">
+                <i class="fa-solid fa-folder-open"></i> Library
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-users"></i> Community
+            </a>
+            <div style="flex: 1;"></div>
+            <a href="@Url.Action("StudentSettings", "Common")" class="nav-item active">
+                <i class="fa-solid fa-gear"></i> Settings
+            </a>
+            <a href="@Url.Action("SignOut", "Common")" class="nav-item" style="color: var(--danger);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+            <h1>Settings</h1>
+            <div class="user-profile">
+                <span style="font-weight: 600; font-size: 14px;">@(Model.FullName)</span>
+                <div class="avatar">
+                    @(Model.FullName.Substring(0, 1).ToUpper())
+                </div>
+            </div>
+        </header>
+
+        <!-- Settings Container -->
+        <div class="settings-container">
+            
+            <div class="settings-nav">
+                <div class="settings-tab active" onclick="switchTab('profile')">
+                    <i class="fa-regular fa-user"></i> Public Profile
+                </div>
+                <div class="settings-tab" onclick="switchTab('security')">
+                    <i class="fa-solid fa-shield-halved"></i> Security & Password
+                </div>
+                <div class="settings-tab" onclick="switchTab('notifications')">
+                    <i class="fa-regular fa-bell"></i> Notifications
+                </div>
+                <div class="settings-tab" onclick="switchTab('billing')">
+                    <i class="fa-regular fa-credit-card"></i> Billing & Subscriptions
+                </div>
+            </div>
+
+            <div class="settings-content">
+                <form method="post" action="#">
+                    
+                    <!-- Profile Tab -->
+                    <div id="profile" class="tab-section active">
+                        <div class="settings-section-title">Public Profile</div>
+                        
+                        <div class="avatar-upload">
+                            <div class="avatar-large">
+                                @(Model.FullName.Substring(0, 1).ToUpper())
+                            </div>
+                            <div class="avatar-actions">
+                                <button type="button" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">Upload new picture</button>
+                                <span style="font-size: 12px; color: var(--text-muted);">JPG, GIF or PNG. Max size of 800K</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" asp-for="FullName" class="form-control" value="@Model.FullName" placeholder="Your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" asp-for="Email" class="form-control" value="@Model.Email" placeholder="your.email@example.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" asp-for="Phone" class="form-control" value="@Model.Phone" placeholder="Your phone number">
+                        </div>
+
+                        <div style="margin-top: 32px; display: flex; justify-content: flex-end;">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div id="security" class="tab-section">
+                        <div class="settings-section-title">Change Password</div>
+
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" asp-for="CurrentPassword" class="form-control" placeholder="Enter current password">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" asp-for="NewPassword" class="form-control" placeholder="New password">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" asp-for="ConfirmPassword" class="form-control" placeholder="Confirm new password">
+                        </div>
+
+                        <div style="margin-top: 32px; display: flex; justify-content: flex-end;">
+                            <button type="button" class="btn btn-primary">Update Password</button>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Tab -->
+                    <div id="notifications" class="tab-section">
+                        <div class="settings-section-title">Notification Preferences</div>
+
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h4>Email Notifications</h4>
+                                <p>Receive daily summaries and important updates via email.</p>
+                            </div>
+                            <div class="toggle-switch @(Model.EmailNotifications ? "on" : "")" onclick="this.classList.toggle('on')"></div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h4>SMS Reminders</h4>
+                                <p>Get text message alerts for upcoming assignment deadlines.</p>
+                            </div>
+                            <div class="toggle-switch @(Model.SMSReminders ? "on" : "")" onclick="this.classList.toggle('on')"></div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <h4>Course Updates</h4>
+                                <p>Notify me when a course I am enrolled in has new lessons.</p>
+                            </div>
+                            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+                        </div>
+
+                        <div style="margin-top: 32px; display: flex; justify-content: flex-end;">
+                            <button type="button" class="btn btn-primary">Save Preferences</button>
+                        </div>
+                    </div>
+
+                    <!-- Billing Tab -->
+                    <div id="billing" class="tab-section">
+                        <div class="settings-section-title">Billing & Subscriptions</div>
+                        <div style="text-align: center; padding: 40px; border: 1px dashed var(--border); border-radius: var(--radius-md); background: var(--bg-color);">
+                            <i class="fa-regular fa-credit-card" style="font-size: 32px; color: var(--text-light); margin-bottom: 16px;"></i>
+                            <h4 style="margin-bottom: 8px;">No active subscriptions</h4>
+                            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">You are currently learning through individual course purchases.</p>
+                            <a href="#" class="btn btn-outline">Explore Memberships</a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function switchTab(tabId) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.settings-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

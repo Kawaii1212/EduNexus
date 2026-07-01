@@ -6,6 +6,7 @@ using EduNexus.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduNexus.Controllers
 {
@@ -15,17 +16,20 @@ namespace EduNexus.Controllers
         private readonly IClassMaterialService _classMaterialService;
         private readonly IProgressService _progressService;
         private readonly IUserService _userService;
+        private readonly EduNexusContext _context;
 
         public CommonController(
             ILogger<CommonController> logger, 
             IClassMaterialService classMaterialService, 
             IProgressService progressService,
-            IUserService userService)
+            IUserService userService,
+            EduNexusContext context)
         {
             _logger = logger;
             _classMaterialService = classMaterialService;
             _progressService = progressService;
             _userService = userService;
+            _context = context;
         }
 
         public IActionResult CourseList()
@@ -41,7 +45,7 @@ namespace EduNexus.Controllers
             {
                 if (User.IsInRole("Student") || User.IsInRole("STUDENT"))
                 {
-                    return RedirectToAction("StudentLibrary", "Common");
+                    return RedirectToAction("StudentDashboard", "Common");
                 }
                 return RedirectToAction("Index", "Home");
             }
@@ -64,7 +68,7 @@ namespace EduNexus.Controllers
                 return View(model);
             }
 
-            if (user.Status != "Active" && user.Status != "active")
+            if (!string.Equals(user.Status, "ACTIVE", StringComparison.OrdinalIgnoreCase))
             {
                 ModelState.AddModelError(string.Empty, "Your account is not active.");
                 return View(model);
@@ -93,7 +97,7 @@ namespace EduNexus.Controllers
 
             if (user.Role?.Equals("Student", StringComparison.OrdinalIgnoreCase) == true)
             {
-                return RedirectToAction("StudentLibrary", "Common");
+                return RedirectToAction("StudentDashboard", "Common");
             }
             
             return RedirectToAction("Index", "Home");
@@ -163,7 +167,7 @@ namespace EduNexus.Controllers
 
             if (user.Role?.Equals("Student", StringComparison.OrdinalIgnoreCase) == true)
             {
-                return RedirectToAction("StudentLibrary", "Common");
+                return RedirectToAction("StudentDashboard", "Common");
             }
             
             return RedirectToAction("Index", "Home");
@@ -229,6 +233,27 @@ namespace EduNexus.Controllers
             return View(viewModel);
         }
 
+        public IActionResult StudentSettings()
+        {
+            var studentIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (studentIdClaim == null) return RedirectToAction("UserLogin", "Common");
+            
+            long studentId = long.Parse(studentIdClaim.Value);
+            var user = _userService.GetUserById(studentId);
+            if (user == null) return RedirectToAction("UserLogin", "Common");
+
+            var model = new StudentSettingsViewModel
+            {
+                FullName = user.FullName ?? "Student",
+                Email = user.Email ?? "",
+                Phone = user.Phone,
+                EmailNotifications = true,
+                SMSReminders = false
+            };
+            return View(model);
+        }
+
+        [HttpGet]
         public IActionResult StudentLibrary()
         {
             var studentIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
@@ -247,6 +272,153 @@ namespace EduNexus.Controllers
                     Description = material.Body ?? "No description provided.",
                     FileUrl = material.FileUrl ?? "#",
                     FileSize = "Unknown Size" 
+                });
+            }
+
+            return View(viewModel);
+        }
+
+        public IActionResult AllCourses(string search = "")
+        {
+            var studentIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (studentIdClaim == null) return RedirectToAction("UserLogin", "Common");
+            var studentName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "Student";
+
+            var coursesQuery = _context.Courses
+                .Include(c => c.CourseGroup)
+                .Include(c => c.CreatedByNavigation)
+                .Where(c => c.Status == "PUBLISHED" && c.DeletedAt == null);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                coursesQuery = coursesQuery.Where(c => c.Title.Contains(search) || c.Description.Contains(search));
+            }
+
+            var courses = coursesQuery
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(c => new CourseItemViewModel
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Description = c.Description ?? "No description available.",
+                    Price = c.Price,
+                    InstructorName = c.CreatedByNavigation != null ? c.CreatedByNavigation.FullName : "System",
+                    ThumbnailUrl = "", // Set an empty or placeholder thumbnail for now
+                    Version = c.Version,
+                    CourseGroupName = c.CourseGroup != null ? c.CourseGroup.Name : ""
+                }).ToList();
+
+            var model = new AllCoursesViewModel
+            {
+                SearchQuery = search,
+                Courses = courses,
+                StudentName = studentName
+            };
+
+            return View(model);
+        }
+
+        public IActionResult StudentDashboard()
+        {
+            var studentIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (studentIdClaim == null) return RedirectToAction("UserLogin", "Common");
+            
+            long studentId = long.Parse(studentIdClaim.Value);
+            var studentName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "Student";
+
+            var enrollments = _progressService.GetEnrollmentsByStudent(studentId);
+            var learningProgresses = _progressService.GetLearningProgressesByStudent(studentId);
+
+            int totalSeconds = 0;
+            var activeDates = new System.Collections.Generic.HashSet<string>();
+
+            foreach(var lp in learningProgresses)
+            {
+                totalSeconds += lp.TimeSpentSeconds;
+                activeDates.Add(lp.LastActiveAt.ToString("yyyy-MM-dd"));
+            }
+
+            var viewModel = new StudentDashboardViewModel
+            {
+                StudentName = studentName,
+                CoursesInProgress = enrollments.Count(e => e.ProgressPercent < 100),
+                TotalLearningHours = totalSeconds / 3600,
+                CurrentStreak = activeDates.Count
+            };
+
+            string[] defaultIcons = { "fa-react", "fa-node-js", "fa-database", "fa-python", "fa-java" };
+            string[] defaultColors = { "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#3b82f6" };
+            int i = 0;
+
+            foreach (var e in enrollments.Where(e => e.ProgressPercent < 100).OrderByDescending(e => e.CreatedAt))
+            {
+                var actualCourse = e.Course ?? e.Class?.Course;
+                if (actualCourse != null)
+                {
+                    var courseVm = new OngoingCourseViewModel
+                    {
+                        CourseId = actualCourse.Id,
+                        CourseName = actualCourse.Title,
+                        CurrentModuleOrLesson = e.Class != null ? "Enrolled in Class: " + e.Class.Name : "Self-paced Course", 
+                        ProgressPercent = e.ProgressPercent,
+                        IconClass = "fa-brands " + defaultIcons[i % defaultIcons.Length],
+                        IconColorHex = defaultColors[i % defaultColors.Length]
+                    };
+                    viewModel.OngoingCourses.Add(courseVm);
+                    if (viewModel.LastAccessedCourse == null) viewModel.LastAccessedCourse = courseVm;
+                    i++;
+                }
+            }
+
+            var optionsBuilder = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<EduNexusContext>();
+            optionsBuilder.UseSqlServer(AppConfiguration.ConnectionString);
+            using var context = new EduNexusContext(optionsBuilder.Options);
+
+            var now = DateTimeOffset.Now;
+
+            var studentClassIds = enrollments.Where(e => e.ClassId != null).Select(e => e.ClassId).ToList();
+            var assignments = context.Assignments
+                .Where(a => studentClassIds.Contains(a.ClassId) && a.DueDate > now)
+                .OrderBy(a => a.DueDate)
+                .Take(5)
+                .ToList();
+
+            viewModel.AssignmentsDue = assignments.Count;
+
+            foreach(var a in assignments)
+            {
+                var daysUntil = (a.DueDate - now).Days;
+                var className = context.Classes.Where(c => c.Id == a.ClassId).Select(c => c.Name).FirstOrDefault() ?? "Course";
+
+                viewModel.UpcomingDeadlines.Add(new DeadlineViewModel
+                {
+                    Title = a.Title,
+                    CourseName = className,
+                    Month = a.DueDate.ToString("MMM"),
+                    Day = a.DueDate.ToString("dd"),
+                    DueInText = $"Due in {daysUntil} days",
+                    IsDanger = daysUntil <= 2,
+                    IsWarning = daysUntil > 2 && daysUntil <= 5
+                });
+            }
+
+            var notifications = context.Notifications
+                .Where(n => n.UserId == studentId)
+                .OrderByDescending(n => n.CreatedAt)
+                .Take(5)
+                .ToList();
+
+            foreach(var n in notifications)
+            {
+                var timeSpan = now - n.CreatedAt;
+                string timeAgo = timeSpan.TotalHours < 24 ? $"{(int)timeSpan.TotalHours} hours ago" : $"{(int)timeSpan.TotalDays} days ago";
+                
+                viewModel.RecentNotifications.Add(new NotificationViewModel
+                {
+                    Content = n.Message ?? n.Title,
+                    TimeAgo = timeAgo,
+                    IconClass = n.Type == "Grade" ? "fa-check" : (n.Type == "System" ? "fa-bell" : "fa-info"),
+                    IconColorClass = n.Type == "Grade" ? "color: var(--success);" : ""
                 });
             }
 

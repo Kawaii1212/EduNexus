@@ -1,6 +1,8 @@
 using EduNexus;
 using EduNexus.Repositories;
 using EduNexus.Services;
+using EduNexus.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,9 @@ AppConfiguration.ConnectionString = builder.Configuration.GetConnectionString("D
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<EduNexusContext>(options =>
+    options.UseSqlServer(AppConfiguration.ConnectionString));
 
 // Register Repositories and Services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -32,8 +37,8 @@ builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Auth/SignIn";
-        options.LogoutPath = "/Auth/SignOut";
+        options.LoginPath = "/Common/UserLogin";
+        options.LogoutPath = "/Common/SignOut";
         options.AccessDeniedPath = "/Home/Error";
     })
     .AddGoogle(options =>
@@ -63,6 +68,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Auth}/{action=SignIn}/{id?}");
+    pattern: "{controller=Common}/{action=UserLogin}/{id?}");
 
 app.Run();

@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EduNexus.Models;
 
-public partial class EduNexusNew02Context : DbContext
+public partial class EduNexusContext : DbContext
 {
-    public EduNexusNew02Context()
+    public EduNexusContext()
     {
     }
 
-    public EduNexusNew02Context(DbContextOptions<EduNexusNew02Context> options)
+    public EduNexusContext(DbContextOptions<EduNexusContext> options)
         : base(options)
     {
     }
